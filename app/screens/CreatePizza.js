@@ -11,40 +11,11 @@ import {
     Clipboard
 } from 'react-native';
 import { gql, graphql } from 'react-apollo';
+import { Ionicons } from '@expo/vector-icons';
 
 import { LoadingScreen, AppHeader } from '../components';
-import { submitOrder } from '../graphql';
+import { submitOrder, queries } from '../graphql';
 
-const PIZZA_COMPONENT_QUERY = gql`
-query PizzaQuery {
-    toppings : getPizzaPartOptions(partType : TOPPING) {
-      ...pizzaPartFragment
-      ...toppingsFragment 
-    },
-    crusts : getPizzaPartOptions(partType : CRUST) {
-        ...pizzaPartFragment
-        ...crustsFragment 
-    },
-    sauces : getPizzaPartOptions(partType : SAUCE) {
-        ...pizzaPartFragment
-    }
-}
-
-fragment pizzaPartFragment on PizzaPart {
-    id
-    name
-    description
-  }
-  
-  fragment toppingsFragment on Topping {
-    price,
-    category
-  }
-  
-  fragment crustsFragment on Crust {
-    additionalCost
-  }
-`
 const mapResultsToProps = ({ data : { 
     loading, toppings, crusts, sauces }}) => ({ loading, toppings, crusts, sauces });
 
@@ -56,12 +27,16 @@ const mapMutateToProps = ({ mutate, ...extra }) => ({
 @graphql(submitOrder, { 
     props : mapMutateToProps 
 })
-@graphql(PIZZA_COMPONENT_QUERY, { 
+@graphql(queries.getPizzaComponents, { 
     props : mapResultsToProps
 })
 export class CreatePizza extends Component {
     static navigationOptions = {
-        header : <AppHeader />
+        title: 'BoomshakaPIZZA',
+        tabBarLabel : 'Place Order',
+        tabBarIcon: ({tintColor}) => (
+            <Ionicons name="ios-cart" size={32} color={tintColor} />
+        ),
     };
 
     componentWillMount() {
@@ -111,13 +86,11 @@ export class CreatePizza extends Component {
         if(!!orderId) {
             return (
                 <View>
-                    <TouchableOpacity onPress={() => navigate('order', { orderId })}>
-                        <View style={{justifyContent:"center",alignItems:"center"}}>
-                            <Text style={{fontWeight: '100'}}>Your order number</Text>
-                            <Text style={{fontWeight: '600', fontSize: 20}}>{orderId}</Text>
-                            <Text style={{ fontStyle: "italic", fontSize : 13 }}>Track your order!</Text>
-                        </View>
-                    </TouchableOpacity>
+                    <View style={{justifyContent:"center",alignItems:"center"}}>
+                        <Text style={{fontWeight: '100'}}>Your order number</Text>
+                        <Text style={{fontWeight: '600', fontSize: 20}}>{orderId}</Text>
+                    </View>
+                    <Button title="View Order Status" onPress={() => navigate('order', { orderId })}/>
                     <Button title="Place another order" onPress={this._resetSelections.bind(this)} />
                 </View>
             )

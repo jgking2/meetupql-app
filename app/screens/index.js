@@ -1,4 +1,4 @@
 export * from './AppNavigation';
-export * from './SpecialtyPizzas';
+export * from './HomeScreen';
 export * from './CreatePizza';
 export * from './CheckOrder';

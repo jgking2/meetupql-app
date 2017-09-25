@@ -5,26 +5,14 @@ import {
     FlatList,
     TextInput,
     TouchableWithoutFeedback,
-    Button
+    Button,
+    Image,
+    Dimensions
 } from 'react-native';
 import dismissKeyboard from 'dismissKeyboard';
 import { graphql, gql } from 'react-apollo';
 import { LoadingScreen } from '../components';
-
-const CHECK_ORDER = gql`
-query CheckOrder($orderId : ID) {
-    order : checkOrder(orderId:$orderId) {
-      pizzas {
-        toppings {
-          name
-        }
-        extraCheese
-        size
-      },
-      status
-    }
-  }
-`;
+import { queries } from '../graphql';
 
 const mapResultToProps = ({ 
     data : { 
@@ -32,7 +20,7 @@ const mapResultToProps = ({
         order 
     } }) => ({ loading, order });
 
-@graphql(CHECK_ORDER, { 
+@graphql(queries.checkOrder, { 
     props : mapResultToProps,
     options: ({orderId}) => ({ 
         fetchPolicy : "network-only", 
@@ -47,16 +35,49 @@ class OrderStatus extends Component {
         if(loading) {
             return <LoadingScreen />
         }
+        const status = this._mapStatus(order.status);
+        const imageWidth = Dimensions.get("screen").width - 30;
         return ( 
-            <View>
-                <Text>Order : {orderId}</Text>
-                <Text>Order status : {this._mapStatus(order.status)}</Text>
+            <View style={{ backgroundColor : "white", padding : 15 }}>
+                <Text style={{ fontSize: 24 }}>{status.title}</Text>                
+                <Text style={{ fontSize: 20, fontWeight: "200", paddingTop: 5, paddingBottom: 5 }}>{status.text}</Text>
+                { 
+                    status.uri && <Image style={{width: imageWidth, height: 250}} source={{ uri: status.uri }} /> 
+                }
             </View>
         )
     }
 
+    /**
+     * 
+     * @param {string} status 
+     * @returns {{ title, text, uri? }}
+     */
     _mapStatus(status) {
-        return status;
+        const statusMap = {
+            PLACED : { 
+                title : 'Received',
+                text: 'We have received your order, and we are preparing it fresh!'
+            },
+            OVEN : { 
+                title: 'In the oven',
+                text : 'Your order is in the oven, cooking to perf...mmmmmm...getting hungry just thinking about it.'
+            },
+            OUT_FOR_DELIVERY : { 
+                title: 'Out for delivery',
+                text: 'Your pizza is on the way to you... I wish I was so lucky 😥' 
+            },
+            DELIVERED : {
+                title: 'Delivered',
+                text : 'You should be eating - we show the pizza is in your hands!' 
+            },
+            DRIVER_ATE_YOUR_PIZZA_SORRY : {
+                title: 'Whoops...',
+                text : 'This is embarrassing, it appears the driver ate your pizza...damnit McLovin, this is the third time this week.',
+                uri : 'https://static.independent.co.uk/s3fs-public/styles/article_small/public/thumbnails/image/2017/06/30/10/istock-501964582-0.jpg'
+            }
+        }
+        return statusMap[status];
     }
 }
 
@@ -76,15 +97,11 @@ export class CheckOrder extends Component {
                 }
             }
         } = this.props;
-
         return (
-            <TouchableWithoutFeedback style={{flex: 1000}}>
-                <View>
-                    {
-                        orderId && <OrderStatus orderId={orderId} />
-                    }
-                </View>
-            </TouchableWithoutFeedback>
+            <View>
+                <Text style={{padding: 20}}>Current status of order {orderId}</Text>
+                <OrderStatus orderId={orderId} />
+            </View>
         )
     }
 }

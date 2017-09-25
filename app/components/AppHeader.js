@@ -13,7 +13,7 @@ export const AppHeader = (props) => {
 const styles = StyleSheet.create({
     container : {
         paddingTop: 25,
-        height: 90,
+        height: 70,
         justifyContent: "center",
         alignItems: "center",
         borderBottomColor: "#ddd",

@@ -2,7 +2,7 @@ import React from 'react';
 // import { CreatePizza, SpecialtyPizzas } from './index';
 
 import { CreatePizza } from './CreatePizza';
-import { SpecialtyPizzas } from './SpecialtyPizzas';
+import { HomeScreen } from './HomeScreen';
 import { 
     TabNavigator, 
     StackNavigator 
@@ -13,12 +13,13 @@ import { CheckOrder } from './CheckOrder';
 
 
 export const TabNav = TabNavigator({
-    Specialties : { screen : SpecialtyPizzas },
+    Home : { screen : HomeScreen },
     Create : { screen : CreatePizza }
     // Orders : { screen : CheckOrder }
 }, {
-    animationEnabled: true,
-    lazy : true
+    swipeEnabled : true,
+    animationEnabled: true
+    // lazy : true
 });
 
 export const AppNavigation = StackNavigator({
